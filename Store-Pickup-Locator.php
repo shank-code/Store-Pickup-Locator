@@ -9,13 +9,13 @@
  * Author URI: http://yourwebsiteurl.com/
  **/
 
-    wp_enqueue_style( 'bootstrap', plugins_url('css/bootstrap.min.css',__FILE__ ),true,'1.1','all');
+    wp_enqueue_style( 'bootstrap', plugins_url('css/bootstrap.min.css1',__FILE__ ),true,'1.1','all');
     wp_enqueue_style( 'ownstyle',plugins_url('css/style.css',__FILE__ ));
 
 
     add_action('admin_menu', 'my_menu_pages');
     function my_menu_pages(){
-        add_menu_page('My Page Title', 'Excellenec Shipping', 'manage_options', 'show-menu', 'my_menu_output','',6 );
+        add_menu_page('My Page Title', 'Excellence Shipping', 'manage_options', 'show-menu', 'my_menu_output','',6 );
         add_submenu_page('show-menu', 'Submenu Page Title', 'Show Store', 'manage_options', 'show-menu','my_menu_output' );
         add_submenu_page('show-menu', 'Submenu Page Title2', 'Add new store', 'manage_options', 'add-store','my_submenu_output' );
     }
@@ -51,7 +51,7 @@
                     <td><?php echo $row->latitude ?></td>
                     <td><?php echo $row->longitude ?></td>
                     <td>
-                        <?php if ($row->status == 1){ echo '<a href="#"><button type="button"  class="btn btn-success">Active</button></a>';}else{ echo '<a href="#"><button type="button"  class="btn btn-danger">Deactive</button></a>';} ?>
+                        <?php if ($row->status == 1){ echo '<a href="admin.php?page=show-menu&status='.$row->status.'&update_id='.$row->id.'"><button type="button"  class="btn btn-success">Active</button></a>';}else{ echo '<a href="admin.php?page=show-menu&status='.$row->status.'&update_id='.$row->id.'"><button type="button"  class="btn btn-danger">Deactive</button></a>';} ?>
                     
                     </td>
                     <td><?php echo '<a href="admin.php?page=show-menu&id='.$row->id.'"><button type="button"  class="btn btn-info">Delete</button></a>' ?></td>
@@ -69,21 +69,33 @@
                 $table = 'wp_store';
                 $wpdb->delete( $table, array( 'id' => $id ) );
             }
+
+            //change status
+            $status = $_GET['status'];
+            $update_id = $_GET['update_id'];
+            if(isset($status)){
+                $table = 'wp_store';
+                if( $status == 1){       
+                  $wpdb->update($table, array( 'status' => '0'),array( 'id' => $update_id ));
+                }else{
+                  $wpdb->update($table, array( 'status' => '1'),array( 'id' => $update_id ));
+                }
+            }
         }
         function my_submenu_output(){
             global $wpdb;
         ?><form action="?page=add-store" method='post' >
         <div class="form-group">
           <label for="title">Title:</label>
-          <input type="title" class="form-control" id="title" placeholder="Enter store name" name="title">
+          <input type="title" class="form-control" id="title" placeholder="Enter store name" name="title" required>
         </div>
         <div class="form-group">
           <label for="address">Street-address:</label>
-          <input type="text" class="form-control" id="address" placeholder="Enter address" name="address">
+          <input type="text" class="form-control" id="address" placeholder="Enter address" name="address" required>
         </div>
         <div class="form-group">
           <label for="zipcode">Zip/Postal Code:</label>
-          <input type="text" class="form-control" id="zipcode" placeholder="Enter zip/postal code" name="zipcode">
+          <input type="text" class="form-control" id="zipcode" placeholder="Enter zip/postal code" name="zipcode" required>
         </div>
         <div class="form-group">
           <label for="latitude">Latitude*:</label>
@@ -113,9 +125,9 @@
             'zipcode' => $_POST['zipcode'],
             'status' => 1,
         );
-        $item = shortcode_atts( $default, $_REQUEST );
+      $item = shortcode_atts( $default, $_REQUEST );
         $wpdb->insert( wp_store, $item );
        
         }
 
-
+include plugin_dir_path(__FILE__) . 'tutsplus-shipping.php';
